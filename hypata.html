@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+
+    <meta charset="utf-8">
+    <title>Hypata Web Demonstration</title>
+    
+    <style type="text/css">
+      html { height: 100% }
+      body { height: 90%; margin: 10; padding: 10 }
+      #map-canvas { height: 90% }
+       #panel {
+        position: absolute;
+        top: 30px;
+        left: 90%;
+        margin-left: -180px;
+        z-index: 5;
+        background-color: #fff;
+        padding: 5px;
+        border: 1px solid #999;
+      }
+      div.editor_logo {
+      font-family: 'Open Sans Condensed',sans-serif;
+      font-size: 16px;
+      font-weight: 300;
+
+      color: #FFF;
+      text-shadow: 0 1px 2px #aaa;
+      width: 243px;
+      height: 91px;
+      background: #22abb1;
+      
+      }
+      div.editor_logo h1 {
+        margin-top: 17px;
+        margin-left: 10px;
+      }
+
+#sliderLabel {
+ border: 1px solid #a2a2a2;
+ -webkit-border-radius: 3px;
+ -moz-border-radius: 3px;
+ border-radius: 3px;
+ cursor: pointer;
+ display: block;
+ height: 30px;
+ overflow: hidden;
+ position: relative;
+ width: 100px;
+ padding-left: 0px;
+}
+
+#sliderLabel input {
+ display: none;
+}
+
+#sliderLabel input:checked + #slider {
+ left: 0px;
+}
+
+#slider {
+ left: -50px;
+ position: absolute;
+ top: 0px;
+ -webkit-transition: left .25s ease-out;
+ -moz-transition: left .25s ease-out;
+ -o-transition: left .25s ease-out;
+ -ms-transition: left .25s ease-out;
+ transition: left .25s ease-out;
+}
+
+#sliderOn,#sliderBlock,#sliderOff {
+ 
+ font-family: arial, verdana, sans-serif;
+ font-weight: bold;
+ height: 30px;
+ line-height: 30px;
+ position: absolute;
+ text-align: center;
+ top: 0px;
+}
+
+#sliderOn {
+ background: #3269aa;
+ background: -webkit-linear-gradient(top, #3269aa 0%, #82b3f4 100%);
+ background: -moz-linear-gradient(top, #3269aa 0%, #82b3f4 100%);
+ background: -o-linear-gradient(top, #3269aa 0%, #82b3f4 100%);
+ background: -ms-linear-gradient(top, #3269aa 0%, #82b3f4 100%);
+ background: linear-gradient(top, #3269aa 0%, #82b3f4 100%);
+ color: white;
+ left: 0px;
+ width: 54px;
+}
+
+#sliderBlock {
+ background: #d9d9d8;
+ background: -webkit-linear-gradient(top, #d9d9d8 0%, #fcfcfc 100%);
+ background: -moz-linear-gradient(top, #d9d9d8 0%, #fcfcfc 100%);
+ background: -o-linear-gradient(top, #d9d9d8 0%, #fcfcfc 100%);
+ background: -ms-linear-gradient(top, #d9d9d8 0%, #fcfcfc 100%);
+ background: linear-gradient(top, #d9d9d8 0%, #fcfcfc 100%);
+ border: 1px solid #a2a2a2;
+ -webkit-border-radius: 3px;
+ -moz-border-radius: 3px;
+ border-radius: 3px;
+ height: 28px;
+ left: 50px;
+ width: 50px;
+}
+
+#sliderOff {
+ background: #f2f3f2;
+ background: -webkit-linear-gradient(top, #8b8c8b 0%, #f2f3f2 50%);
+ background: -moz-linear-gradient(top, #8b8c8b 0%, #f2f3f2 50%);
+ background: -o-linear-gradient(top, #8b8c8b 0%, #f2f3f2 50%);
+ background: -ms-linear-gradient(top, #8b8c8b 0%, #f2f3f2 50%);
+ background: linear-gradient(top, #8b8c8b 0%, #f2f3f2 50%);
+ color: #8b8b8b;
+ left: 96px;
+ width: 54px;
+}
+
+
+    </style>
+     <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDU_d-4E5fjmU2wAEXKkfI-dLnOsU506Lw&libraries=visualization">
+    </script>
+    <script type="text/javascript"
+       src="hypata/js/jquery-2.1.0.min.js">
+    </script>
+    <link rel="stylesheet" type="text/css" href="hypata/demo.css" />
+
+    <link href="hypata/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link href="hypata/css/bootstrap-theme.min.css" rel="stylesheet">
+
+
+    <script type="text/javascript">
+    
+  var layers = [];
+  var map;
+
+
+function initialize() {
+  var myLatlng = new google.maps.LatLng(53.7478803,-7.7418994);
+  var mapOptions = {
+    zoom: 8,
+    center: myLatlng
+  };
+
+  map = new google.maps.Map(document.getElementById('map-canvas'),
+      mapOptions);
+
+  var rainLayer = new google.maps.KmlLayer({
+    url:'http://hypata.macm.ie/kml/mean_rainfall.kmz',
+    suppressInfoWindows: false,
+    map: null  
+  });
+
+  var phPointLayer = new google.maps.KmlLayer({
+    url:'http://hypata.macm.ie/kml/ph_data_points.kmz',
+    suppressInfoWindows: false,
+    map: null
+  });
+
+
+var phSpatialLayer = new google.maps.KmlLayer({
+    url:'http://hypata.macm.ie/kml/ph_spatial.kmz',
+    suppressInfoWindows: false,
+    map:null
+  });
+
+var soilTypeLayer = new google.maps.KmlLayer({
+    url:'http://hypata.macm.ie/kml/soil_types.kmz',
+    suppressInfoWindows: false,
+    map:null
+  });
+
+var nitrogenLayer = new google.maps.KmlLayer({
+    url:'http://hypata.macm.ie/kml/nitrogen_overlay5.kmz',
+    suppressInfoWindows: false,
+    map:null
+  });
+
+var hydrationLayer = new google.maps.KmlLayer({
+    url:'http://hypata.macm.ie/kml/hydration_overlay.kmz',
+    suppressInfoWindows: false,
+    map:null
+  });
+
+
+var weedsLayer = new google.maps.KmlLayer({
+    //url: 'http://localhost/fingal.kml',
+    //url:'http://hypata.macm.ie/kml/burren_soil_map.kml',
+    url:'http://hypata.macm.ie/kml/weeds_overlay.kmz',
+    suppressInfoWindows: false,
+    map:null
+  });
+
+var phScaleLayer = new google.maps.KmlLayer({
+    url:'http://hypata.macm.ie/kml/ph_scale_overlay.kmz',
+    suppressInfoWindows: false,
+    map:null
+  });
+
+var cropHealthLayer = new google.maps.KmlLayer({
+    url:'http://hypata.macm.ie/kml/crop_health_overlay.kmz',
+    suppressInfoWindows: false,
+    map:null
+  });
+
+  layers[0] = rainLayer;
+  layers[1] = phPointLayer;
+  layers[2] = phSpatialLayer;
+  layers[3] = soilTypeLayer;
+  layers[4] = nitrogenLayer;
+  layers[5] = hydrationLayer;
+  layers[6] = weedsLayer;
+  layers[7] = phScaleLayer;
+  layers[8] = cropHealthLayer;
+
+}
+
+  function toggleLayerMap(i) {
+    
+    if(layers[i].getMap() === null) {
+      layers[i].setMap(map);
+    }
+    else {
+      layers[i].setMap(null);
+    }
+   
+  }
+
+ function toggleLayer(i) {
+    
+    for(j=0;j<layers.length;j++) {
+      layers[j].setMap(null);
+    }
+    if(layers[i].getMap() === null) {
+      layers[i].setMap(map);
+    }
+    else {
+      layers[i].setMap(null);
+    }
+   
+  }
+
+function toggleMenu() {
+      //$("#sat_button").click(function()
+    $("#site-title").click(function()
+    {
+      if($("#menu2").is(":visible")) {
+        $("#menu2").hide();
+        $("#menu1").fadeIn("slow");
+      } else if($("#menu1").is(":visible")) {
+        $("#menu1").hide();
+        $("#menu2").fadeIn("slow");
+      }
+
+    $("#site-title").hide();
+    $("#sat_button").hide();
+    $("#reset").fadeIn("slow");
+
+
+      var location = new google.maps.LatLng(53.509228, -6.253253);
+      map.setCenter(location)
+      map.setMapTypeId(google.maps.MapTypeId.SATELLITE)
+      smoothZoom(map, 17, map.getZoom());
+      var marker = new google.maps.Marker({
+          position: location,
+          title:"Fingal Field 1"
+          });
+      marker.setMap(map);
+    });
+   }
+
+
+$(function(){
+  $('#sat_button').on('click', function (e) {
+
+    if($("#menu2").is(":visible")) {
+        $("#menu2").hide();
+        $("#menu1").fadeIn("slow");
+      } else if($("#menu1").is(":visible")) {
+        $("#menu1").hide();
+        $("#menu2").fadeIn("slow");
+      }
+
+
+    $("#site-title").hide();
+    $("#sat_button").hide();
+    $("#reset").fadeIn("slow");
+    $("#reset_button").fadeIn("slow");
+
+
+      var location = new google.maps.LatLng(53.509228, -6.253253);
+      map.setCenter(location)
+      map.setMapTypeId(google.maps.MapTypeId.SATELLITE)
+      smoothZoom(map, 17, map.getZoom());
+      var marker = new google.maps.Marker({
+          position: location,
+          title:"Fingal Field 1"
+          });
+      marker.setMap(map);
+  })
+
+$('#reset_button').on('click', function (e) {
+  window.location.href = "hypata.html";
+  })
+});
+
+   function smoothZoom (map, max, cnt) {
+    if (cnt >= max) {
+            return;
+        }
+    else {
+        z = google.maps.event.addListener(map, 'zoom_changed', function(event){
+            google.maps.event.removeListener(z);
+            smoothZoom(map, max, cnt + 1);
+        });
+        setTimeout(function(){map.setZoom(cnt)}, 120); // 80ms is what I found to work well on my system -- it might not work well on all systems
+    }
+  }
+
+
+google.maps.event.addDomListener(window, 'load', initialize);
+
+    </script>
+  </head>
+  <body>
+<div class="page-header">
+    
+      <div class="row-fluid">
+          <h1><a href="hypata.html"><img src='hypata/images/hypata_logo_sml.png'/></a>Welcome to HYPATA.</h1>
+          <div style="padding-left: 80px;padding-top:-120px;">Hyperspectral Imaging Technology Solutions and Innovation.</div>
+          <div style="padding-left: 520px;padding-top:-40px;"><a id="sat_button" class="btn btn-lg btn-primary" title="Satellite View" rel="home" >Satellite View</a></div>
+          <div style="padding-left: 520px;padding-top:-40px;"><a id="reset_button" style="display:none;" class="btn btn-lg btn-primary" title="Reset" rel="home">Reset</a></div>
+        </div>
+   
+</div>
+
+<div class="container">
+  <div class="row-fluid">
+      <div class="span4">
+          <p class="lead"></p>
+        </div>
+      <div class="span4">
+          
+        </div>
+      <div class="span4">
+          <p class="lead"></p>
+        </div>
+    </div>
+</div>
+    <!-- 
+      <div class="page-header">
+        
+        <h1><a href="hypata.html"><img src='hypata/images/hypata_logo_sml.png'/></a>Welcome to HYPATA.</h1>
+        
+        <a id="sat_button" class="btn btn-lg btn-primary" title="Satellite View" rel="home">Satellite View</a>
+        <a id="reset_button" style="display:none;" class="btn btn-lg btn-primary" title="Reset" href="hypata.html" rel="home">Reset</a>
+      </div> -->
+    <!-- <div>
+      <header id="header" role="banner">
+           
+           <div id="site-title" style="float:right; width:80%"><a onClick="toggleMenu(); return false;" title="Satellite View" rel="home">Satellite View</a></div>
+           <div id="reset" style="float:right; width:80%; display:none;"><a href="hypata2.html" title="Reset" rel="home">Reset</a></div>
+      </header> 
+    </div>
+     -->
+    <div id="map-canvas" style="width:79%; height:100%; float:left"></div>
+    <div id="content-window" style="width:19%; height:100%; float:left">
+
+
+   <div class="wrapper-demo" style="/*overflow: hidden;*/ display:none;" id="menu1">
+     <ul id="demo2">
+      <li>
+        <!-- <label id="sliderLabel">
+       -->
+       <label for="Nitrogen">Toggle Nitrogen <img src="hypata/images/molecule-icon.png"/></label>
+       <input type="radio" name="selection" onclick="toggleLayer(4)"/>
+     <!-- <span id="slider">
+     <span id="sliderOn">ON</span>
+     <span id="sliderOff">OFF</span>
+     <span id="sliderBlock"></span>
+     </span>
+    </label>            
+          --> 
+     </li>
+     <li>
+      <!-- <label id="sliderLabel"> -->
+      <label for="Hydration">Toggle Hydration <img src="hypata/images/water-droplet-icon_sml.png"/></label>
+      <input type="radio" name="selection" onclick="toggleLayer(5)"/>
+     </li>
+     <li>
+            <label for="Weeds">Toggle Weeds          <img src="hypata/images/weeds.png"/></label>
+        <input type="radio" name="selection" onclick="toggleLayer(6)"/>
+     </li>
+
+      <li>
+            <label for="Ph Scale">Toggle Ph Scale   <img src="hypata/images/ph_scale.png"/></label>
+        <input type="radio" name="selection" onclick="toggleLayer(7)"/>
+     </li>
+      <li>
+            <label for="Crop Health">Toggle Crop Health                <img src="hypata/images/grass-icon.png"/></label>
+        <input type="radio" name="selection" onclick="toggleLayer(8)"/>
+     </li>
+     </ul>
+   </div> 
+   <div class="wrapper-demo" style="/*overflow: hidden; */" id="menu2">
+    <ul id="demo1">
+      <li>
+          <label for="Rain">Overlay Rainfall</label>
+          <input type="checkbox" class="js-switch" name="demo1" id="Rain" value="0" onclick="toggleLayerMap(0)" />
+     </li>
+     <li>
+          <label for="Soilph">Overlay Soil Ph Data</label>
+          <input type="checkbox" class="js-switch" name="demo2" id="Soilph" value="1" onclick="toggleLayerMap(1)" />
+     </li>
+     <li>
+          <label for="SoilSpat">Overlay Soil Ph Spatial</label>
+          <input type="checkbox" class="js-switch" name="demo3" id="SoilSpat" value="2" onclick="toggleLayerMap(2)" />
+     </li>
+     <li>
+          <label for="SoilType">Overlay Soil Types</label>
+          <input type="checkbox" class="js-switch" name="demo4" id="SoilType" value="3" onclick="toggleLayerMap(3)" />
+     </li>
+    </ul>
+    
+   </div>
+
+  </div>
+  <div class="footer">
+      <div class="container">
+        <p style="padding-top:10px" class="text-muted">HYPATA CO. 2014 All rights reserved</p>
+      </div>
+    </div>  
+  </body>
+</html>
